@@ -22,10 +22,7 @@ func AddTag(c *gin.Context) {
 	shortID := tagRequest.ShortID
 	tag := tagRequest.Tag
 
-	r := database.CreateClient(0)
-	defer r.Close()
-
-	val, err := r.Get(database.Ctx, shortID).Result()
+	val, err := database.Get(shortID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Data not found for the given ShortID"})
 		return
@@ -59,10 +56,6 @@ func AddTag(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to Marshal updated data"})
 		return
 	}
-	err = r.Set(database.Ctx, shortID, updateData, 0).Err()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update Database"})
-		return
-	}
+	database.Set(shortID, string(updateData), 0)
 	c.JSON(http.StatusOK, data)
 }

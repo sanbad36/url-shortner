@@ -12,4 +12,6 @@ func SetupRouters(router *gin.Engine) {
     router.DELETE("/api/v1/:shortID", routes.DeleteURL)
     router.PUT("/api/v1/:shortID", routes.EditURL)
     router.POST("/api/v1/addTag", routes.AddTag)
+    router.GET("/api/v1/all-data", routes.GetAllData)
+    router.GET("/api/v1/top-domains", routes.GetTopDomains)
 }

@@ -10,10 +10,7 @@ import (
 func DeleteURL(c *gin.Context) {
 	shortID := c.Param("shortID")
 
-	r := database.CreateClient(0)
-	defer r.Close()
-
-	err := r.Del(database.Ctx, shortID).Err()
+	err := database.Delete(shortID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to delete the shortened Link"})
 		return

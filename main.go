@@ -6,7 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/sanbad36/url-shortner/api/routersetup" // Importing the routersetup package
+	"github.com/sanbad36/url-shortner/api/database"
+	"github.com/sanbad36/url-shortner/api/routersetup"
 )
 
 func main() {
@@ -15,9 +16,9 @@ func main() {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	router := gin.Default()
+	database.Init()
 
-	// Using the SetupRouters function from the routersetup package
+	router := gin.Default()
 	routersetup.SetupRouters(router)
 
 	port := os.Getenv("APP_PORT")
