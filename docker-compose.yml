@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  redis:
+    build:
+      context: ./db
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  app:
+    build:
+      context: .
+    container_name: url-shortener
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - DB_ADDRESS=redis:6379
+      - DB_PASS=
+      - DOMAIN=localhost:8080
+      - API_QUOTA=10
