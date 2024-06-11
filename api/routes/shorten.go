@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 	"os"
 	"strconv"
@@ -8,7 +10,6 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/sanbad36/url-shortner/api/database"
 	"github.com/sanbad36/url-shortner/api/models"
 	"github.com/sanbad36/url-shortner/api/utils"
@@ -51,15 +52,21 @@ func ShortenURL(c *gin.Context) {
 
 	var id string
 	if body.CustomShort == "" {
-		id = uuid.New().String()[:6]
+		hash := sha256.New()
+		hash.Write([]byte(body.URL))
+		id = hex.EncodeToString(hash.Sum(nil))[:6]
 	} else {
 		id = body.CustomShort
 	}
 
-	val, _ = database.Get(id)
-	if val != "" {
-		c.JSON(http.StatusForbidden, gin.H{
-			"error": "URL Custom Short Already Exists",
+	existingURL, _ := database.Get(id)
+	if existingURL != "" {
+		c.JSON(http.StatusOK, models.Response{
+			URL:             body.URL,
+			CustomShort:     os.Getenv("DOMAIN") + "/" + id,
+			Expiry:          body.Expiry,
+			XRateRemaining:  10, // This can be set appropriately based on your logic
+			XRateLimitReset: 30, // This can be set appropriately based on your logic
 		})
 		return
 	}
@@ -70,11 +77,11 @@ func ShortenURL(c *gin.Context) {
 	database.Set(id, body.URL, body.Expiry*3600*time.Second)
 
 	resp := models.Response{
-		Expiry:         body.Expiry,
-		XRateRemaining: 10,
+		Expiry:          body.Expiry,
+		XRateRemaining:  10,
 		XRateLimitReset: 30,
-		URL:            body.URL,
-		CustomShort:    "",
+		URL:             body.URL,
+		CustomShort:     os.Getenv("DOMAIN") + "/" + id,
 	}
 	database.Decr(c.ClientIP())
 	val, _ = database.Get(c.ClientIP())
@@ -82,6 +89,6 @@ func ShortenURL(c *gin.Context) {
 
 	ttl, _ := database.TTL(c.ClientIP())
 	resp.XRateLimitReset = ttl / time.Nanosecond / time.Minute
-	resp.CustomShort = os.Getenv("DOMAIN") + "/" + id
+
 	c.JSON(http.StatusOK, resp)
 }
