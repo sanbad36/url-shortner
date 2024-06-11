@@ -13,7 +13,9 @@ A URL Shortener service built with GoLang that provides the functionality to sho
 - In-memory and Redis support
 
 ## Architecture Diagram
-![Architecture Diagram](path/to/architecture_diagram.png)
+![API Diagram](apis.PNG)
+
+![Architecture Diagram](architecture.PNG)
 
 ## Getting Started
 
