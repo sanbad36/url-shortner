@@ -15,5 +15,7 @@ func GetByShortID(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Data not found for given ShortID"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": val})
+
+	// Redirect to the original URL
+	c.Redirect(http.StatusMovedPermanently, val)
 }
